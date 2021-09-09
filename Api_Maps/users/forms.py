@@ -4,9 +4,6 @@
 from django import forms
 from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
 from django.contrib.auth.models import User
-from django.db import models
-from django.db.models import fields
-from django.forms import ModelForm
 
 # Models
 from .models import Profile
@@ -90,5 +87,6 @@ class ProfileForm(forms.ModelForm):
         model = Profile
         fields = (
             'address', 'town', 
-            'country', 'post_code', 
-            'longitude', 'latitude')
+            'county','country', 
+            'post_code', 'longitude', 
+            'latitude')
