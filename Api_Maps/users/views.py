@@ -10,19 +10,17 @@ from django.shortcuts import redirect, render, reverse
 from django.utils.decorators import method_decorator
 from django.views.generic.base import TemplateView
 from django.views.generic.edit import FormView
-import requests
 
 # Mixins
 from Api_Maps.mixins import (AjaxFormMixin, form_errors, 
                             re_captcha_validation, redirect_params)
 
-# Models
+# Forms
 from .forms import AuthForm, UserForm, ProfileForm
 
 
 result = 'Error'
 message = 'There was an error, please try again.'
-
 
 
 class AccountView(TemplateView):
@@ -95,3 +93,34 @@ class SignUpView(AjaxFormMixin, FormView):
             data = {'result': result, 'message': message}
             return JsonResponse(data)
         return response
+
+
+class SignInView(AjaxFormMixin, FormView):
+    """Handle SignIn of user."""
+
+    template_name = 'users/sign_in.html'
+    form_class = AuthForm
+    success_url = '/'
+    
+    def form_valid(self, form):
+        response = super(AjaxFormMixin, self).form_valid(form)
+        if self.request.is_ajax():
+            username = form.cleaned_data.get('username')
+            password = form.cleaned_data.get('password')
+            user = authenticate(
+                self.request, username=username, password=password)
+            if user is not None:
+                login(self.request, user, backend='django.contrib.auth.backends.ModelBackend')
+                result = 'Success'
+                message = 'You are now logged in.'
+            else:
+                message = form_errors(form)
+            data = {'result': result, 'message': message}
+            return JsonResponse(data)
+        return response
+
+
+def sign_out(request):
+    """Handle user signout."""
+    logout(request)
+    return redirect(reverse('users:sign-in'))
